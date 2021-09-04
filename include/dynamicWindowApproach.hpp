@@ -60,7 +60,7 @@ class DynamicWindowApproach
         Eigen::MatrixXd transferFunction_;
         std::vector<std::string> stateNames;
         Eigen::Vector2d goal_;
-        std::vector<double> obstacles_ = {};
+  };
 
 
 };

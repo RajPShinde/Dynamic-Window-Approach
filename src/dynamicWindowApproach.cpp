@@ -101,6 +101,7 @@ void DynamicWindowApproach::globalPath(){
 
 void DynamicWindowApproach::run(){
 
+	cv::namedWindow("Dynamic Window Approach: Motion Planner", cv::WINDOW_NORMAL);
 	bool goalReached = false;
 	// Initial x, y, theta, velovity, angularVelocity
 	currentState_<< 0,0,0,0,0;  
@@ -114,13 +115,29 @@ void DynamicWindowApproach::run(){
 		// Send the control commond to robot that leads to bestTrajectory for time dt
 		predictState(currentState_, control);
 
-		// Draw
+		// Draw 
+		// Window
+		cv::Mat dwa(3500,3500, CV_8UC3, cv::Scalar(255,255,255));
+		// Goal
+		cv::circle(dwa, cv_offset(goal_(0), goal_(1), dwa.cols, dwa.rows),30, cv::Scalar(0,255,0), 5);
+		// Robot Location
+		cv::circle(dwa, cv_offset(currentState_(0), currentState_(1), dwa.cols, dwa.rows), 30, cv::Scalar(0,0,0), 5);
+		// Robot Orientation
+		cv::arrowedLine(dwa, cv_offset(currentState_(0), currentState_(1), dwa.cols, dwa.rows), 
+							cv_offset(currentState_(0) + std::cos(currentState_(2)), currentState_(1) 
+									  + std::sin(currentState_(2)), dwa.cols, dwa.rows), cv::Scalar(0,0,0), 7);
+		// Best Trajectory
+		for(int i = 0; i<bestTrajectory.size(); i++){
+			cv::circle(dwa, cv_offset(bestTrajectory[j](0), bestTrajectory[j](1), dwa.cols, dwa.rows), 7, cv::Scalar(255,200,200), -1);
+		}
 
 		// Check if robot is within goal threshold radius
 		if(){
 			goalReached = true;
 		}
 
+    cv::imshow("Dynamic Window Approach: Motion Planner", dwa);
+    cv::waitKey(5);
 	}
 
 }
