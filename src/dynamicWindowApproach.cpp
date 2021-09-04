@@ -81,7 +81,7 @@ std::vector<Eigen::VectorXd> DynamicWindowApproach::rolloutTrajectories(){
 			trajectory = calculateTrajectory(control);
 
 			// Compute cost for the trajectory
-			cost = computeDistanceToGoalCost(trajectory) + computeDistanceToObstacleCost(trajectory) - trajectory.back()(3);
+			cost = computeDistanceToGoalCost(trajectory) + computeDistanceToObstacleCost(trajectory) + computeVelocityCost(trajectory);
 			
 			if(cost < minCost){
 				minCost = cost;
@@ -141,6 +141,11 @@ double DynamicWindowApproach::computeDistanceToObstacleCost(std::vector<Eigen::V
 	return obstacleCost;
 }
 
+double DynamicWindowApproach::computeVelocityCost(std::vector<Eigen::VectorXd> trajectory){
+	double velocityCost= maxLinearVelocity_ - trajectory.back()[3];
+	return velocityCost;
+}
+
 void DynamicWindowApproach::globalPath(){
 }
 
@@ -177,7 +182,7 @@ void DynamicWindowApproach::run(){
 		// Send the control commond to robot that leads to bestTrajectory for time dt
 		control_(0) = bestTrajectory[1](3);
 		control_(1) = bestTrajectory[1](4);
-		std::cout<<control_(0)<<" "<<control_(1)<<"\n";
+		std::cout<<"\033[1m\033[32mLinear Velocity-\033[0m"<<control_(0)<<" \033[1m\033[32mAngular Velocity-\033[0m"<<control_(1)<<"\n";
 		predictState(control_, currentState_);
 
 		// Draw 
@@ -203,6 +208,7 @@ void DynamicWindowApproach::run(){
 		// Check if robot is within goal threshold radius
 		if(std::sqrt(std::pow(currentState_(0) - goal_(0), 2) + std::pow(currentState_(1) - goal_(1), 2) <= robotRadius_)){
 			goalNotReached = false;
+			cv::waitKey(0);
 		}
 
     cv::imshow("Dynamic Window Approach: Motion Planner", dwa);

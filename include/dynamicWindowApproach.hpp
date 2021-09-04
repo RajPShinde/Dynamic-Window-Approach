@@ -33,6 +33,8 @@ class DynamicWindowApproach
 
         double computeDistanceToObstacleCost(std::vector<Eigen::VectorXd> trajectory);
 
+        double computeVelocityCost(std::vector<Eigen::VectorXd> trajectory);
+
         void predictState(Eigen::Vector2d &control, Eigen::VectorXd &state);  
 
         std::vector<Eigen::VectorXd> calculateTrajectory(Eigen::Vector2d &control);  
