@@ -31,7 +31,11 @@ class DynamicWindowApproach
 
         void computeCost();
 
-        void predictState(Eigen::Vector2d control_, Eigen::VectorXd state_);        
+        Eigen::VectorXd predictState(Eigen::Vector2d control_, Eigen::VectorXd state_);    
+
+        void dynamicWindow(Eigen::VectorXd &currentState_);
+
+        void globalPath();    
 
         void run();
 
@@ -39,9 +43,9 @@ class DynamicWindowApproach
     private:
         double maxLinearVelocity_ = 2;
         double minLinearVelocity_ = -1;
-        double angularVelocity_ = 0.5;
+        double maxAngularVelocity_ = 0.5;
         double maxLinearAcceleration_ = 0.2;
-        double AngularAcceleration_ = 0.1;
+        double maxAngularAcceleration_ = 0.1;
         double timeStep_ = 0.01;
         double windowTime_ = 3;
         double goalCostFactor_;
