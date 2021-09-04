@@ -1,14 +1,20 @@
 #include <dynamicWindowApproach.hpp>
 
-DynamicWindowApproach::DynamicWindowApproach() {
+DynamicWindowApproach::DynamicWindowApproach(double x, double y): goal_(x, y) {
+	state_.resize(stateSize);
+	state_.setzero();
+	currentState_.resize(stateSize);
+	current_.setzero();
 	transferFunction_.resize(stateSize,stateSize);
 	transferFunction_.setIdentity();
+
+	run();
 }
 
 DynamicWindowApproach::~DynamicWindowApproach() {
 }
 
-Eigen::VectorXd DynamicWindowApproach::predictState(Eigen::Vector2d &control_, Eigen::VectorXd state_){
+Eigen::VectorXd DynamicWindowApproach::predictState(Eigen::Vector2d &control, Eigen::VectorXd &state){
 	double theta = state_(2);
 
 	transferFunction_(x, linearVelocity) = control_(0) * cos(theta) * dt;
@@ -19,11 +25,9 @@ Eigen::VectorXd DynamicWindowApproach::predictState(Eigen::Vector2d &control_, E
 	state_(4) = control_(1);
 
 	state_ = transferFunction_ * state_;
-
-	retrun state_
 }
 
-void DynamicWindowApproach::dynamicWindow(Eigen::VectorXd &currentState_){
+void DynamicWindowApproach::dynamicWindow(){
 	currentWindow_.clear();
 	double currLinearVelocity = currentState_(3);
 	double currTheta = currentState_(4);
@@ -46,20 +50,50 @@ void DynamicWindowApproach::dynamicWindow(Eigen::VectorXd &currentState_){
 	currentWindow_.push_back(std::min(currentState_(4) + angularVelocityIncrement, maxAngularVelocity_));
 }
 
+vod DynamicWindowApproach::calculateTrajectory(Eigen::Vector2d &control){
+	std::vector<Eigen::Matrix<double, 5, 1>> trajectory;
+	double time = 0;
+	Eigen::VectorXd state = currentState_;
+	while(time<=windowTime){
+		predictState(control, state);
+		trajectory.push_back(state);
+		time = time + dt_;
+	}
+	return trajectory;
+}
+
 void DynamicWindowApproach::rolloutTrajectories(){
-	
+	double cost = 0;
+	double minCost = INT_MAX;
+	std::vector<Eigen::VectorXd> bestTrajectory;
 	// Find all trajectories with sampled input in dynamic window
-	for(int i = currentWindow_(0); i<=currentWindow_(1); i = i + velocityResolution){
-		for(int j = currentWindow_(2); j<=currentWindow_(3); j = j + angularVelocityResolution){
-			calulateTrajectory(i, j);
+	for(int i = currentWindow_(0); i<=currentWindow_(1); i = i + velocityResolution_){
+		for(int j = currentWindow_(2); j<=currentWindow_(3); j = j + angularVelocityResolution_){
+			Eigen::Vector2d control << i, j;
+			std::vector<Eigen::VectorXd> trajectory;
+			trajectory = calulateTrajectory(control);
+
+			// Compute cost for the trajectory
+			cost = computeCost(trajectory)
+			if(cost < minCost){
+				minCost = cost;
+				bestTrajectory = trajectory;
+			}
 		}
 	}
-
+	return bestTrajectory;
 }
 
 
-void DynamicWindowApproach::computeCost(){
+double DynamicWindowApproach::computeCost(std::vector<Eigen::VectorXd> trajectory){
+	// Cost: Distance to goal
 
+	// Cost: Distance to Obstacle
+
+	// Cost: Distance from Global Path
+	// Cost: Time to Goal
+	// TO-DO
+	return totalCost;
 }
 
 void DynamicWindowApproach::globalPath(){
@@ -67,23 +101,21 @@ void DynamicWindowApproach::globalPath(){
 
 void DynamicWindowApproach::run(){
 
-	globalPath = globalPath();
-	std::vector<double> obstacles = {};
 	bool goalReached = false;
 	// Initial x, y, theta, velovity, angularVelocity
 	currentState_<< 0,0,0,0,0;  
 	
 	// Run Motion Planner till robot reaches Goal
 	while(goalReached){
-
 		// find dynamic window
-		dynamicWindow(currentState_);
-		// find Trajectories
-		trajectories = rolloutTrajectories();
-		// find best trajectory based on cost
-		bestTrajectory(globalPath, obstacles, trajectories, currentState_);
+		dynamicWindow();
+		// find Trajectories as well as find best of all those based on cost functions
+		bestTrajectory = rolloutTrajectories();
 		// Send the control commond to robot that leads to bestTrajectory for time dt
 		predictState(currentState_, control);
+
+		// Draw
+
 		// Check if robot is within goal threshold radius
 		if(){
 			goalReached = true;

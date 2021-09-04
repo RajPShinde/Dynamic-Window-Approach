@@ -18,7 +18,7 @@ class DynamicWindowApproach
         *   @param none
         *   @return none
         */
-        DynamicWindowApproach();
+        DynamicWindowApproach(double x, double y);
 
         /**
         *   @brief Destructor of DynamicWindowApproach
@@ -33,7 +33,7 @@ class DynamicWindowApproach
 
         Eigen::VectorXd predictState(Eigen::Vector2d control_, Eigen::VectorXd state_);    
 
-        void dynamicWindow(Eigen::VectorXd &currentState_);
+        void dynamicWindow();
 
         void globalPath();    
 
@@ -48,14 +48,19 @@ class DynamicWindowApproach
         double maxAngularAcceleration_ = 0.1;
         double timeStep_ = 0.01;
         double windowTime_ = 3;
+        double velocityResolution = 0.05;
+        double angularVelocityResolution = 0.05;
         double goalCostFactor_;
         double globalpathCostFactor_;
         double obstacleCostFactor_;
         Eigen::MatrixXd transferFunction_;
         Eigen::VectorXd state_;
+        Eigen::VectorXd currentState_
         Eigen::Vector2d control_;
         Eigen::MatrixXd transferFunction_;
         std::vector<std::string> stateNames;
+        Eigen::Vector2d goal_;
+        std::vector<double> obstacles_ = {};
 
 
 };
