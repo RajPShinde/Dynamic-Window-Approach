@@ -181,21 +181,21 @@ void DynamicWindowApproach::run(){
 		// Window
 		cv::Mat dwa(3500,3500, CV_8UC3, cv::Scalar(255,255,255));
 		// Goal
-		cv::circle(dwa, cv_offset(goal_(0), goal_(1), dwa.cols, dwa.rows), 30, cv::Scalar(0,255,0), -1);
-		// Robot Location
-		cv::circle(dwa, cv_offset(currentState_(0), currentState_(1), dwa.cols, dwa.rows), 30, cv::Scalar(0,0,0), 5);
-		// Robot Orientation
-		cv::arrowedLine(dwa, cv_offset(currentState_(0), currentState_(1), dwa.cols, dwa.rows), 
-							cv_offset(currentState_(0) + std::cos(currentState_(2)), currentState_(1) 
-									  + std::sin(currentState_(2)), dwa.cols, dwa.rows), cv::Scalar(0,0,0), 7);
+		cv::circle(dwa, cv_offset(goal_(0), goal_(1), dwa.cols, dwa.rows), 50, cv::Scalar(0,255,0), -1);
 		// Obstacles
 		for(int i = 0; i<obstacles_.size(); i++){
 			cv::circle(dwa, cv_offset(obstacles_[i][0], obstacles_[i][1], dwa.cols, dwa.rows), 30, cv::Scalar(0,0,0), -1);
 		}
 		// Best Trajectory
 		for(int i = 0; i<bestTrajectory.size(); i++){
-			cv::circle(dwa, cv_offset(bestTrajectory[i](0), bestTrajectory[i](1), dwa.cols, dwa.rows), 7, cv::Scalar(0,0,255), -1);
+			cv::circle(dwa, cv_offset(bestTrajectory[i](0), bestTrajectory[i](1), dwa.cols, dwa.rows), 15, cv::Scalar(0,0,255), -1);
 		}
+		// Robot Location
+		cv::circle(dwa, cv_offset(currentState_(0), currentState_(1), dwa.cols, dwa.rows), 50, cv::Scalar(0,0,0), 15);
+		// Robot Orientation
+		cv::arrowedLine(dwa, cv_offset(currentState_(0), currentState_(1), dwa.cols, dwa.rows), 
+							cv_offset(currentState_(0) + std::cos(currentState_(2)), currentState_(1) 
+									  + std::sin(currentState_(2)), dwa.cols, dwa.rows), cv::Scalar(0,0,0), 15);
 
 		// Check if robot is within goal threshold radius
 		if(std::sqrt(std::pow(currentState_(0) - goal_(0), 2) + std::pow(currentState_(1) - goal_(1), 2) <= robotRadius_)){

@@ -51,12 +51,12 @@ class DynamicWindowApproach
     private:
         double pi_ = 3.14159;
         double maxLinearVelocity_ = 1;
-        double minLinearVelocity_ = -1;
+        double minLinearVelocity_ = -0.5;
         double maxAngularVelocity_ = 40 * pi_/180;
         double maxLinearAcceleration_ = 0.2;
         double maxAngularAcceleration_ = 40 * pi_/180;
         double dt_ = 0.1;
-        double windowTime_ = 3;
+        double windowTime_ = 4;
         double velocityResolution_ = 0.01;
         double angularVelocityResolution_ = 0.1 * pi_/180;
         double goalCostFactor_ = 3;
