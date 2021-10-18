@@ -50,8 +50,8 @@ class DynamicWindowApproach
 
     private:
         double pi_ = 3.14159;
-        double maxLinearVelocity_ = 2;
-        double minLinearVelocity_ = -0.5;
+        double maxLinearVelocity_ = 1;
+        double minLinearVelocity_ = -1;
         double maxAngularVelocity_ = 40 * pi_/180;
         double maxLinearAcceleration_ = 0.2;
         double maxAngularAcceleration_ = 40 * pi_/180;
@@ -59,7 +59,7 @@ class DynamicWindowApproach
         double windowTime_ = 3;
         double velocityResolution_ = 0.01;
         double angularVelocityResolution_ = 0.1 * pi_/180;
-        double goalCostFactor_ = 1;
+        double goalCostFactor_ = 3;
         double globalpathCostFactor_ = 1;
         double obstacleCostFactor_ = 1;
         double robotRadius_ = 1;
@@ -69,7 +69,8 @@ class DynamicWindowApproach
         Eigen::VectorXd currentState_;
         Eigen::Vector2d control_;
         std::vector<std::string> stateNames;
-        std::vector<std::vector<double>> obstacles_ = {{-1, -1}, {0, 2}, {4.0, 2.0}, {5.0, 4.0}, {5.0, 5.0}, {5.0, 6.0}, {5.0, 9.0}, {8.0, 9.0}, {7.0, 9.0}, {12.0, 12.0}};
+        std::vector<std::vector<double>> obstacles_ = {{-8, -5}, {-8, 11}, {-13, 10}, {-13, 5}, {0, 5}, {-5, 5}, {5, 11}, {-11, 0},
+                                                       {-1, -1}, {0, 2}, {4.0, 2.0}, {5.0, 15.0}, {8.0, 9.0}, {12.0, 12.0}};
         std::vector<double> currentWindow_;
         Eigen::Vector2d goal_;
 };

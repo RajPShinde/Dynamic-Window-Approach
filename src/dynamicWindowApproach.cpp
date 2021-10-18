@@ -1,7 +1,6 @@
 #include <dynamicWindowApproach.hpp>
 
 DynamicWindowApproach::DynamicWindowApproach(double x, double y): goal_(x, y) {
-	std::cout<<"DWA\n";
 	state_.resize(stateSize_);
 	state_.setZero();
 	currentState_.resize(stateSize_);
@@ -99,17 +98,11 @@ double DynamicWindowApproach::computeDistanceToGoalCost(std::vector<Eigen::Vecto
 	// Cost: Distance to goal (using error Angle)
 	double startGoalVector = std::sqrt(goal_(0)*goal_(0) + goal_(1)*goal_(1));
 	double startCurrentVector = std::sqrt(std::pow(trajectory.back()(0), 2) + std::pow(trajectory.back()(1), 2));
+	double distance = std::sqrt(std::pow(trajectory.back()(0)-goal_(0),2) + std::pow(trajectory.back()(1)-goal_(1),2));
 	double dotProduct = (goal_(0) * trajectory.back()(0))+ (goal_(1) * trajectory.back()(1));
 	double cosTheta = dotProduct / (startGoalVector * startCurrentVector);
 	double theta = std::acos(cosTheta);
-	goalCost = goalCostFactor_ * theta;
-
-	// double dx1 = trajectory.back()(0) - goal_(0);
-	// double dy1 = trajectory.back()(1) - goal_(1);
-	// double dx2 = goal_(0);
-	// double dy2 = goal_(1);
-	// double cross = abs(dx1*dy2 - dx2*dy1);
-	// goalCost = cross*0.001;
+	goalCost = goalCostFactor_ * (distance*0.1 + theta);
 
 	return goalCost;
 }
@@ -137,16 +130,14 @@ double DynamicWindowApproach::computeDistanceToObstacleCost(std::vector<Eigen::V
     	}
   	}
   	obstacleCost = 1 / minimumSeparation;
+  	obstacleCost = obstacleCost * obstacleCostFactor_;
 
 	return obstacleCost;
 }
 
 double DynamicWindowApproach::computeVelocityCost(std::vector<Eigen::VectorXd> trajectory){
-	double velocityCost= maxLinearVelocity_ - trajectory.back()[3];
+	double velocityCost = maxLinearVelocity_ - trajectory.back()[3];
 	return velocityCost;
-}
-
-void DynamicWindowApproach::globalPath(){
 }
 
 cv::Point2i DynamicWindowApproach::cv_offset(
@@ -165,10 +156,10 @@ void DynamicWindowApproach::run(){
 	std::vector<Eigen::VectorXd> bestTrajectory;
 
 	// Initial x, y, theta, velovity, angularVelocity
-	currentState_<< 0,0,3.14/8,0,0;
+	currentState_<< -13,-8,3.14/8,0,0;
 
 	// Goal
-	goal_<< 10, 10;
+	goal_<< 10, 15;
 
 	// Run Motion Planner till robot reaches Goal
 	while(goalNotReached){
@@ -178,18 +169,19 @@ void DynamicWindowApproach::run(){
 
 		// find Trajectories as well as find best of all those based on cost functions
 		bestTrajectory = rolloutTrajectories();
-
 		// Send the control commond to robot that leads to bestTrajectory for time dt
 		control_(0) = bestTrajectory[1](3);
 		control_(1) = bestTrajectory[1](4);
+
 		std::cout<<"\033[1m\033[32mLinear Velocity-\033[0m"<<control_(0)<<" \033[1m\033[32mAngular Velocity-\033[0m"<<control_(1)<<"\n";
+
 		predictState(control_, currentState_);
 
 		// Draw 
 		// Window
 		cv::Mat dwa(3500,3500, CV_8UC3, cv::Scalar(255,255,255));
 		// Goal
-		cv::circle(dwa, cv_offset(goal_(0), goal_(1), dwa.cols, dwa.rows),30, cv::Scalar(0,255,0), 5);
+		cv::circle(dwa, cv_offset(goal_(0), goal_(1), dwa.cols, dwa.rows), 30, cv::Scalar(0,255,0), -1);
 		// Robot Location
 		cv::circle(dwa, cv_offset(currentState_(0), currentState_(1), dwa.cols, dwa.rows), 30, cv::Scalar(0,0,0), 5);
 		// Robot Orientation
@@ -198,7 +190,7 @@ void DynamicWindowApproach::run(){
 									  + std::sin(currentState_(2)), dwa.cols, dwa.rows), cv::Scalar(0,0,0), 7);
 		// Obstacles
 		for(int i = 0; i<obstacles_.size(); i++){
-			cv::circle(dwa, cv_offset(obstacles_[i][0], obstacles_[i][1], dwa.cols, dwa.rows), 20, cv::Scalar(0,0,0), -1);
+			cv::circle(dwa, cv_offset(obstacles_[i][0], obstacles_[i][1], dwa.cols, dwa.rows), 30, cv::Scalar(0,0,0), -1);
 		}
 		// Best Trajectory
 		for(int i = 0; i<bestTrajectory.size(); i++){
@@ -211,6 +203,7 @@ void DynamicWindowApproach::run(){
 			cv::waitKey(0);
 		}
 
+    cv::resizeWindow("Dynamic Window Approach: Motion Planner", 400, 400);
     cv::imshow("Dynamic Window Approach: Motion Planner", dwa);
     cv::waitKey(5);
 	}
